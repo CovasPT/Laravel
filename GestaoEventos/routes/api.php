@@ -2,24 +2,23 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\EventoController; // <--- Não te esqueças disto!
-use App\Http\Controllers\AuthController; // <--- Não te esqueças de importar!
+use App\Http\Controllers\EventoController;
+use App\Http\Controllers\AuthController;
 
-// Rotas Públicas
+// 🟢 ZONA PÚBLICA (Qualquer um acede)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Rotas Protegidas (Só com Token)
+// Ver eventos não precisa de login
+Route::get('/eventos', [EventoController::class, 'index']);
+Route::get('/eventos/{id}', [EventoController::class, 'show']);
+
+// 🔴 ZONA PRIVADA (Precisa de Token Bearer)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     
-    // Vamos mover os eventos para aqui daqui a pouco!
+    // <---------------- Alterado por gemini: Apenas admins mexem nos dados
+    Route::post('/eventos', [EventoController::class, 'store']);
+    Route::put('/eventos/{id}', [EventoController::class, 'update']);
+    Route::delete('/eventos/{id}', [EventoController::class, 'destroy']);
 });
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-// <---------------- Alterado por gemini: As nossas rotas de Eventos
-Route::apiResource('eventos', EventoController::class);
-
